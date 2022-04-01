@@ -1,0 +1,90 @@
+{
+  "name": "vscode-apple-music",
+  "displayName": "Apple Music Player",
+  "description": "Apple Music client for Visual Studio Code",
+  "repository": {
+    "url": "https://github.com/sebsojeda/vscode-apple-music"
+  },
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "publisher": "sebsojeda",
+  "version": "1.0.0",
+  "galleryBanner": {
+    "color": "#f94c57",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.66.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-apple-music.previousTrack",
+        "title": "Previous Track",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.nextTrack",
+        "title": "Next Track",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.pauseTrack",
+        "title": "Pause",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.playTrack",
+        "title": "Play",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.muteTrack",
+        "title": "Mute",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.unmuteTrack",
+        "title": "Unmute",
+        "category": "Apple Music"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.66.0",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "@vscode/test-electron": "^2.1.3",
+    "eslint": "^8.11.0",
+    "glob": "^7.2.0",
+    "mocha": "^9.2.2",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.5.5",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "run-applescript": "^6.0.0"
+  }
+}
