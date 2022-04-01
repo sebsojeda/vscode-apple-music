@@ -5,12 +5,18 @@
   "repository": {
     "url": "https://github.com/sebsojeda/vscode-apple-music"
   },
+  "extensionKind": [
+    "ui"
+  ],
+  "os": [
+    "darwin"
+  ],
   "license": "MIT",
   "icon": "images/icon.png",
   "publisher": "sebsojeda",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "galleryBanner": {
-    "color": "#f94c57",
+    "color": "#fc3c44",
     "theme": "light"
   },
   "engines": {
