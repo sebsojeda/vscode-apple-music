@@ -53,6 +53,7 @@ export default class AppleMusicPlayer {
    */
   public playPreviousTrack() {
     this.appleScriptRunner.run("previous-track.applescript");
+    this.updateState();
   }
 
   /**
@@ -60,6 +61,7 @@ export default class AppleMusicPlayer {
    */
   public playNextTrack() {
     this.appleScriptRunner.run("next-track.applescript");
+    this.updateState();
   }
 
   /**
@@ -67,7 +69,7 @@ export default class AppleMusicPlayer {
    */
   public pauseTrack() {
     this.appleScriptRunner.run("pause.applescript");
-    this.setPausedState();
+    this.updateState();
   }
 
   /**
@@ -75,7 +77,7 @@ export default class AppleMusicPlayer {
    */
   public playTrack() {
     this.appleScriptRunner.run("play.applescript");
-    this.setPlayingState();
+    this.updateState();
   }
 
   /**
@@ -90,6 +92,7 @@ export default class AppleMusicPlayer {
    */
   public muteTrack() {
     this.appleScriptRunner.run("mute.applescript");
+    this.updateState();
   }
 
   /**
@@ -97,6 +100,7 @@ export default class AppleMusicPlayer {
    */
   public unmuteTrack() {
     this.appleScriptRunner.run("unmute.applescript");
+    this.updateState();
   }
 
   /**

@@ -56,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  intervalId = setInterval(() => player.updateState(), 1000);
+  intervalId = setInterval(() => player.updateState(), 5000);
   player.show();
 }
 
