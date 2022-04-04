@@ -11,7 +11,15 @@ Apple Music client for Visual Studio Code.
 
 ![screen shot](images/screen-shot.png)
 
+## Requirements
+
+- macOS with Apple Music
+
 ## Release Notes
+
+### 1.0.1
+
+Update `package.json` configuration for Azure Marketplace
 
 ### 1.0.0
 
