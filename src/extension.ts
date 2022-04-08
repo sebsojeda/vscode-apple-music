@@ -3,10 +3,12 @@ import AppleMusicPlayer from "./apple-music-player";
 import AppleScriptRunner from "./apple-script-runner";
 
 let intervalId: NodeJS.Timeout;
+let scriptRunner: AppleScriptRunner;
+let player: AppleMusicPlayer;
 
 export function activate(context: vscode.ExtensionContext) {
-  const scriptRunner = new AppleScriptRunner();
-  const player = new AppleMusicPlayer(scriptRunner);
+  scriptRunner = new AppleScriptRunner();
+  player = new AppleMusicPlayer(scriptRunner);
   const config = {
     commands: [
       {
@@ -29,8 +31,8 @@ export function activate(context: vscode.ExtensionContext) {
         cb: () => player.playTrack(),
       },
       {
-        id: "vscode-apple-music.openTrack",
-        cb: () => player.openTrack(),
+        id: "vscode-apple-music.open",
+        cb: () => player.open(),
         ui: player.titleTrackButton,
       },
       {

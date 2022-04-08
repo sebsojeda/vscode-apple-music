@@ -1,12 +1,11 @@
-set default to "{\"a\":null,\"n\":null,\"s\":null,\"v\":null}"
 if application "Music" is running then
     tell application "Music"
-        if player state is not stopped then
+        try
             return "{\"a\":\"" & artist of current track & "\",\"n\":\"" & name of current track & "\",\"s\":\"" & player state & "\",\"v\":" & sound volume & "}"
-        else
-            return default
-        end if
+        on error
+            return "{\"a\":null,\"n\":null,\"s\":\"" & player state & "\",\"v\":" & sound volume & "}"
+        end try
     end tell
 else
-    return default
+    return "{\"a\":null,\"n\":null,\"s\":null,\"v\":null}"
 end if

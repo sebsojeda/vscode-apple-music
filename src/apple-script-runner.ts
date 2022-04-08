@@ -9,9 +9,9 @@ export default class AppleScriptRunner {
     this.scriptMap = this.initializeMap();
   }
 
-  public async run(script: string) {
+  public run(script: string) {
     if (this.scriptMap.has(script)) {
-      return await runAppleScript(this.scriptMap.get(script) as string);
+      return runAppleScript(this.scriptMap.get(script) as string);
     }
     throw new Error("Script not found");
   }

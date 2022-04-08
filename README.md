@@ -17,10 +17,16 @@ Apple Music client for Visual Studio Code.
 
 ## Release Notes
 
+### 1.2.0
+
+- Fix issue where player state is not syncing correctly
+- Make UI more responsive to actions
+- Add activation events to extension
+
 ### 1.0.1
 
-Update `package.json` configuration for Azure Marketplace
+- Update `package.json` configuration for Azure Marketplace
 
 ### 1.0.0
 
-Initial release
+- Initial release

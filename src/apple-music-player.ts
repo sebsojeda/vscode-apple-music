@@ -51,16 +51,18 @@ export default class AppleMusicPlayer {
   /**
    * Play the previous track
    */
-  public playPreviousTrack() {
-    this.appleScriptRunner.run("previous-track.applescript");
+  public async playPreviousTrack() {
+    // ensure previous track is played before updating
+    await this.appleScriptRunner.run("previous-track.applescript");
     this.updateState();
   }
 
   /**
    * Play the next track
    */
-  public playNextTrack() {
-    this.appleScriptRunner.run("next-track.applescript");
+  public async playNextTrack() {
+    // ensure next track is played before updating
+    await this.appleScriptRunner.run("next-track.applescript");
     this.updateState();
   }
 
@@ -69,7 +71,7 @@ export default class AppleMusicPlayer {
    */
   public pauseTrack() {
     this.appleScriptRunner.run("pause.applescript");
-    this.updateState();
+    this.setPausedState();
   }
 
   /**
@@ -77,13 +79,13 @@ export default class AppleMusicPlayer {
    */
   public playTrack() {
     this.appleScriptRunner.run("play.applescript");
-    this.updateState();
+    this.setPlayingState();
   }
 
   /**
-   * Opens the track
+   * Open the player
    */
-  public openTrack() {
+  public open() {
     this.appleScriptRunner.run("open.applescript");
   }
 
@@ -92,7 +94,7 @@ export default class AppleMusicPlayer {
    */
   public muteTrack() {
     this.appleScriptRunner.run("mute.applescript");
-    this.updateState();
+    this.setMutedState();
   }
 
   /**
@@ -100,7 +102,7 @@ export default class AppleMusicPlayer {
    */
   public unmuteTrack() {
     this.appleScriptRunner.run("unmute.applescript");
-    this.updateState();
+    this.setUnmutedState();
   }
 
   /**
@@ -135,7 +137,8 @@ export default class AppleMusicPlayer {
       this.setUnmutedState();
     }
 
-    let text = status.s ? `${status.n} - ${status.a}` : "Not Playing";
+    let text =
+      status.n && status.a ? `${status.n} — ${status.a}` : "Not Playing";
     this.titleTrackButton.tooltip = text;
 
     text = text.length > 50 ? text.substring(0, 50) + "..." : text;

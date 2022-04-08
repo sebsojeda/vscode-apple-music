@@ -14,7 +14,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "publisher": "sebsojeda",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "galleryBanner": {
     "color": "#fc3c44",
     "theme": "dark"
@@ -26,7 +26,13 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onCommand:vscode-apple-music.previousTrack",
+    "onCommand:vscode-apple-music.nextTrack",
+    "onCommand:vscode-apple-music.pauseTrack",
+    "onCommand:vscode-apple-music.playTrack",
+    "onCommand:vscode-apple-music.muteTrack",
+    "onCommand:vscode-apple-music.unmuteTrack",
+    "onCommand:vscode-apple-music.open"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -59,6 +65,11 @@
       {
         "command": "vscode-apple-music.unmuteTrack",
         "title": "Unmute",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.open",
+        "title": "Open",
         "category": "Apple Music"
       }
     ]
