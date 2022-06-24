@@ -17,6 +17,10 @@ Apple Music client for Visual Studio Code.
 
 ## Release Notes
 
+### 1.2.1
+
+- Bug fix for stopped player state
+
 ### 1.2.0
 
 - Fix issue where player state is not syncing correctly

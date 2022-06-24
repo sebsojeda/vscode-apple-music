@@ -160,7 +160,7 @@ export default class AppleMusicPlayer {
   private setStoppedState() {
     this.pauseTrackButton.text = "$(play)";
     this.pauseTrackButton.tooltip = "Play";
-    this.pauseTrackButton.command = "vscode-apple-music.openTrack";
+    this.pauseTrackButton.command = "vscode-apple-music.open";
   }
 
   private setMutedState() {
