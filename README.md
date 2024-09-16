@@ -18,6 +18,10 @@ Apple Music client for Visual Studio Code.
 
 ## Release Notes
 
+### 1.2.3
+
+- Fix setInterval bug
+
 ### 1.2.2
 
 - Add a tooltip with track and album art information

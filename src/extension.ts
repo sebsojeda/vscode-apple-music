@@ -62,6 +62,11 @@ export function activate(context: vscode.ExtensionContext) {
   player.updateState().then(() => {
     player.show();
   });
+
+  player.onUserAction(() => {
+    clearInterval(intervalId);
+    intervalId = setInterval(() => player.updateState(), 5000);
+  });
 }
 
 export function deactivate() {

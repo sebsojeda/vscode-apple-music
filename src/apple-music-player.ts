@@ -10,6 +10,7 @@ export default class AppleMusicPlayer {
 
   private appleScriptRunner: AppleScriptRunner;
   private volume: number = 100;
+  private callback: () => void = () => {};
 
   constructor(appleScriptRunner: AppleScriptRunner) {
     this.previousTrackButton = vscode.window.createStatusBarItem(
@@ -50,10 +51,18 @@ export default class AppleMusicPlayer {
   }
 
   /**
+   * Send user action signal
+   */
+  public onUserAction(cb: () => void) {
+    this.callback = cb;
+  }
+
+  /**
    * Play the previous track
    */
   public async playPreviousTrack() {
     // ensure previous track is played before updating
+    this.callback();
     await this.appleScriptRunner.run("previous-track.applescript");
     this.updateState();
   }
@@ -63,6 +72,7 @@ export default class AppleMusicPlayer {
    */
   public async playNextTrack() {
     // ensure next track is played before updating
+    this.callback();
     await this.appleScriptRunner.run("next-track.applescript");
     this.updateState();
   }
@@ -71,6 +81,7 @@ export default class AppleMusicPlayer {
    * Pause the track
    */
   public pauseTrack() {
+    this.callback();
     this.appleScriptRunner.run("pause.applescript");
     this.setPausedState();
   }
@@ -79,6 +90,7 @@ export default class AppleMusicPlayer {
    * Play the track
    */
   public playTrack() {
+    this.callback();
     this.appleScriptRunner.run("play.applescript");
     this.setPlayingState();
   }
@@ -94,6 +106,7 @@ export default class AppleMusicPlayer {
    * Mute the track
    */
   public muteTrack() {
+    this.callback();
     this.appleScriptRunner.run("mute.applescript");
     this.setMutedState();
   }
@@ -102,6 +115,7 @@ export default class AppleMusicPlayer {
    * Unmute the track
    */
   public unmuteTrack() {
+    this.callback();
     this.appleScriptRunner.run("unmute.applescript", this.volume.toString());
     this.setUnmutedState();
   }
@@ -123,7 +137,9 @@ export default class AppleMusicPlayer {
   public async updateState() {
     const result = await this.appleScriptRunner.run("get-status.applescript");
     const status = JSON.parse(result);
-    this.volume = status.v;
+    if (status.v !== 0) {
+      this.volume = status.v;
+    }
 
     if (status.s === "paused") {
       this.setPausedState();
