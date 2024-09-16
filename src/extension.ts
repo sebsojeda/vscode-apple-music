@@ -1,74 +1,94 @@
 import * as vscode from "vscode";
 import AppleMusicPlayer from "./apple-music-player";
 import AppleScriptRunner from "./apple-script-runner";
+import { commands } from "./constants";
 
-let intervalId: NodeJS.Timeout;
-let scriptRunner: AppleScriptRunner;
+let appleScriptRunner: AppleScriptRunner;
 let player: AppleMusicPlayer;
 
-export function activate(context: vscode.ExtensionContext) {
-  scriptRunner = new AppleScriptRunner();
-  player = new AppleMusicPlayer(scriptRunner);
-  const config = {
-    commands: [
-      {
-        id: "vscode-apple-music.previousTrack",
-        cb: () => player.playPreviousTrack(),
-        ui: player.previousTrackButton,
-      },
-      {
-        id: "vscode-apple-music.nextTrack",
-        cb: () => player.playNextTrack(),
-        ui: player.nextTrackButton,
-      },
-      {
-        id: "vscode-apple-music.pauseTrack",
-        cb: () => player.pauseTrack(),
-        ui: player.pauseTrackButton,
-      },
-      {
-        id: "vscode-apple-music.playTrack",
-        cb: () => player.playTrack(),
-      },
-      {
-        id: "vscode-apple-music.open",
-        cb: () => player.open(),
-        ui: player.titleTrackButton,
-      },
-      {
-        id: "vscode-apple-music.muteTrack",
-        cb: () => player.muteTrack(),
-        ui: player.muteTrackButton,
-      },
-      {
-        id: "vscode-apple-music.unmuteTrack",
-        cb: () => player.unmuteTrack(),
-      },
-    ],
-  };
+type Config = {
+  id: string;
+  cb: () => void;
+  ui?: vscode.StatusBarItem;
+}[];
 
-  config.commands.map((command) => {
+export function activate(context: vscode.ExtensionContext) {
+  appleScriptRunner = new AppleScriptRunner();
+  player = new AppleMusicPlayer(appleScriptRunner);
+
+  const config: Config = [
+    {
+      id: commands.previousTrack,
+      cb: () => player.playPreviousTrack(),
+      ui: player.previousTrackButton,
+    },
+    {
+      id: commands.playPauseTrack,
+      cb: () => player.playPauseTrack(),
+      ui: player.playPauseTrackButton,
+    },
+    {
+      id: commands.playTrack,
+      cb: () => player.playTrack(),
+    },
+    {
+      id: commands.pauseTrack,
+      cb: () => player.pauseTrack(),
+    },
+    {
+      id: commands.nextTrack,
+      cb: () => player.playNextTrack(),
+      ui: player.nextTrackButton,
+    },
+    {
+      id: commands.open,
+      cb: () => player.open(),
+      ui: player.titleTrackButton,
+    },
+    {
+      id: commands.muteUnmuteTrack,
+      cb: () => player.muteUnmuteTrack(),
+      ui: player.muteUnmuteTrackButton,
+    },
+    {
+      id: commands.muteTrack,
+      cb: () => player.muteTrack(),
+    },
+    {
+      id: commands.unmuteTrack,
+      cb: () => player.unmuteTrack(),
+    },
+    {
+      id: commands.volumeUp,
+      cb: () => player.volumeUp(),
+    },
+    {
+      id: commands.volumeDown,
+      cb: () => player.volumeDown(),
+    },
+    {
+      id: commands.toggleRepeat,
+      cb: () => player.toggleRepeat(),
+    },
+    {
+      id: commands.toggleShuffle,
+      cb: () => player.toggleShuffle(),
+    },
+  ];
+
+  config.map((command) => {
     context.subscriptions.push(
       vscode.commands.registerCommand(command.id, command.cb)
     );
-
     if (command.ui) {
       command.ui.command = command.id;
       context.subscriptions.push(command.ui);
     }
   });
 
-  intervalId = setInterval(() => player.updateState(), 5000);
-  player.updateState().then(() => {
-    player.show();
-  });
-
-  player.onUserAction(() => {
-    clearInterval(intervalId);
-    intervalId = setInterval(() => player.updateState(), 5000);
-  });
+  player.init();
 }
 
 export function deactivate() {
-  clearInterval(intervalId);
+  player.dispose();
 }

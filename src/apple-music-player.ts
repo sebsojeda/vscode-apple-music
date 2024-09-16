@@ -1,213 +1,329 @@
 import * as vscode from "vscode";
 import AppleScriptRunner from "./apple-script-runner";
+import { icons } from "./constants";
+
+type Status = {
+  a: string | null;
+  m: string | null;
+  t: string | null;
+  s: string | null;
+  v: number | null;
+  d: string | null;
+};
 
 export default class AppleMusicPlayer {
   public previousTrackButton: vscode.StatusBarItem;
-  public pauseTrackButton: vscode.StatusBarItem;
+  public playPauseTrackButton: vscode.StatusBarItem;
   public nextTrackButton: vscode.StatusBarItem;
-  public muteTrackButton: vscode.StatusBarItem;
   public titleTrackButton: vscode.StatusBarItem;
+  public muteUnmuteTrackButton: vscode.StatusBarItem;
 
   private appleScriptRunner: AppleScriptRunner;
-  private volume: number = 100;
-  private callback: () => void = () => {};
+  private refreshInterval: number;
+  private interval: NodeJS.Timeout | undefined;
 
-  constructor(appleScriptRunner: AppleScriptRunner) {
+  private album: string | null = null;
+  private artist: string | null = null;
+  private track: string | null = null;
+  private artwork: string | null = null;
+  private volume: number = 100;
+  private _muted: boolean = false;
+  private _playing: boolean = false;
+
+  constructor(
+    appleScriptRunner: AppleScriptRunner,
+    refreshInterval: number = 1000
+  ) {
     this.previousTrackButton = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left,
       5
     );
-    this.previousTrackButton.text = "$(chevron-left)";
-    this.previousTrackButton.tooltip = "Previous";
-
-    this.pauseTrackButton = vscode.window.createStatusBarItem(
+    this.playPauseTrackButton = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left,
       4
     );
-    this.pauseTrackButton.text = "$(play)";
-    this.pauseTrackButton.tooltip = "Pause";
-
     this.nextTrackButton = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left,
       3
     );
-    this.nextTrackButton.text = "$(chevron-right)";
-    this.nextTrackButton.tooltip = "Next";
-
     this.titleTrackButton = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left,
       2
     );
-    this.titleTrackButton.text = "Not Playing";
-
-    this.muteTrackButton = vscode.window.createStatusBarItem(
+    this.muteUnmuteTrackButton = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left,
       1
     );
-    this.muteTrackButton.text = "$(unmute)";
-    this.muteTrackButton.tooltip = "Mute";
-
     this.appleScriptRunner = appleScriptRunner;
+    this.refreshInterval = refreshInterval;
   }
 
   /**
-   * Send user action signal
-   */
-  public onUserAction(cb: () => void) {
-    this.callback = cb;
-  }
-
-  /**
-   * Play the previous track
+   * Play previous track
    */
   public async playPreviousTrack() {
-    // ensure previous track is played before updating
-    this.callback();
+    this.stopRefresh();
     await this.appleScriptRunner.run("previous-track.applescript");
-    this.updateState();
+    this.startRefresh();
   }
 
   /**
-   * Play the next track
+   * Play next track
    */
   public async playNextTrack() {
-    // ensure next track is played before updating
-    this.callback();
+    this.stopRefresh();
     await this.appleScriptRunner.run("next-track.applescript");
-    this.updateState();
+    this.startRefresh();
   }
 
   /**
-   * Pause the track
+   * Play/Pause track
    */
-  public pauseTrack() {
-    this.callback();
-    this.appleScriptRunner.run("pause.applescript");
-    this.setPausedState();
+  public async playPauseTrack() {
+    this.stopRefresh();
+    if (this.playing) {
+      await this.appleScriptRunner.run("pause.applescript");
+      this.playing = false;
+    } else {
+      await this.appleScriptRunner.run("play.applescript");
+      this.playing = true;
+    }
+    this.startRefresh();
   }
 
   /**
-   * Play the track
+   * Play track
    */
-  public playTrack() {
-    this.callback();
-    this.appleScriptRunner.run("play.applescript");
-    this.setPlayingState();
+  public async playTrack() {
+    this.stopRefresh();
+    await this.appleScriptRunner.run("play.applescript");
+    this.playing = true;
+    this.startRefresh();
   }
 
   /**
-   * Open the player
+   * Pause track
+   */
+  public async pauseTrack() {
+    this.stopRefresh();
+    await this.appleScriptRunner.run("pause.applescript");
+    this.playing = false;
+    this.startRefresh();
+  }
+
+  /**
+   * Open Apple Music
    */
   public open() {
     this.appleScriptRunner.run("open.applescript");
   }
 
   /**
-   * Mute the track
+   * Mute/Unmute track
    */
-  public muteTrack() {
-    this.callback();
-    this.appleScriptRunner.run("mute.applescript");
-    this.setMutedState();
+  public async muteUnmuteTrack() {
+    this.stopRefresh();
+    if (this.muted) {
+      await this.appleScriptRunner.run(
+        "set-volume.applescript",
+        `${this.volume}`
+      );
+      this.muted = false;
+    } else {
+      await this.appleScriptRunner.run("set-volume.applescript", "0");
+      this.muted = true;
+    }
+    this.startRefresh();
   }
 
   /**
-   * Unmute the track
+   * Mute track
    */
-  public unmuteTrack() {
-    this.callback();
-    this.appleScriptRunner.run("unmute.applescript", this.volume.toString());
-    this.setUnmutedState();
+  public async muteTrack() {
+    this.stopRefresh();
+    await this.appleScriptRunner.run("set-volume.applescript", "0");
+    this.muted = true;
+    this.startRefresh();
   }
 
   /**
-   * Show the UI
+   * Unmute track
    */
-  public show() {
+  public async unmuteTrack() {
+    this.stopRefresh();
+    await this.appleScriptRunner.run(
+      "set-volume.applescript",
+      `${this.volume}`
+    );
+    this.muted = false;
+    this.startRefresh();
+  }
+
+  /**
+   * Volume up
+   */
+  public async volumeUp() {
+    this.stopRefresh();
+    this.volume = Math.min(100, this.volume + 6.25);
+    await this.appleScriptRunner.run(
+      "set-volume.applescript",
+      `${this.volume}`
+    );
+    this.startRefresh();
+  }
+
+  /**
+   * Volume down
+   */
+  public async volumeDown() {
+    this.stopRefresh();
+    this.volume = Math.max(0, this.volume - 6.25);
+    await this.appleScriptRunner.run(
+      "set-volume.applescript",
+      `${this.volume}`
+    );
+    this.startRefresh();
+  }
+
+  /**
+   * Toggle repeat
+   */
+  public async toggleRepeat() {
+    this.stopRefresh();
+    await this.appleScriptRunner.run("toggle-repeat.applescript");
+    this.startRefresh();
+  }
+
+  /**
+   * Toggle shuffle
+   */
+  public async toggleShuffle() {
+    this.stopRefresh();
+    await this.appleScriptRunner.run("toggle-shuffle.applescript");
+    this.startRefresh();
+  }
+
+  /**
+   * Initialize the player
+   */
+  public async init() {
+    this.startRefresh();
     this.previousTrackButton.show();
-    this.pauseTrackButton.show();
+    this.playPauseTrackButton.show();
     this.nextTrackButton.show();
     this.titleTrackButton.show();
-    this.muteTrackButton.show();
+    this.muteUnmuteTrackButton.show();
   }
 
   /**
-   * Update the UI state
+   * Dispose of the UI
    */
-  public async updateState() {
-    const result = await this.appleScriptRunner.run("get-status.applescript");
-    const status = JSON.parse(result);
-    if (status.v !== 0) {
-      this.volume = status.v;
+  public dispose() {
+    this.previousTrackButton.dispose();
+    this.playPauseTrackButton.dispose();
+    this.nextTrackButton.dispose();
+    this.titleTrackButton.dispose();
+    this.muteUnmuteTrackButton.dispose();
+    this.stopRefresh();
+  }
+
+  private stopRefresh() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = undefined;
+    }
+  }
+
+  private async startRefresh() {
+    await this.syncPlayerState();
+    this.interval = setInterval(
+      () => this.syncPlayerState(),
+      this.refreshInterval
+    );
+  }
+
+  private async syncPlayerState() {
+    const results = await this.appleScriptRunner.run("get-status.applescript");
+    const status = JSON.parse(results) as Status;
+
+    this.album = status.a;
+    this.artist = status.m;
+    this.track = status.t;
+    this.artwork = status.d;
+    this.playing = status.s === "playing";
+
+    if (status.v) {
+      if (status.v === 0) {
+        this.muted = true;
+      } else {
+        this.muted = false;
+        this.volume = status.v;
+      }
     }
 
-    if (status.s === "paused") {
-      this.setPausedState();
-    } else if (status.s === "playing") {
-      this.setPlayingState();
-    } else {
-      this.setStoppedState();
-    }
-
-    if (status.v === 0) {
-      this.setMutedState();
-    } else {
-      this.setUnmutedState();
-    }
-
-    let tooltip = new vscode.MarkdownString();
-    tooltip.supportHtml = true;
-    tooltip.supportThemeIcons = true;
-    if (status.d) {
+    if (this.track && this.artist) {
+      let albumArtwork = this.artwork ?? "";
+      let tooltip = new vscode.MarkdownString();
+      tooltip.supportHtml = true;
       tooltip.appendMarkdown(
         `<table>
           <tr>
             <td>
-              <img src="${status.d}" width="48px" height="48px" style="display:inline;" />
+              <img src="${albumArtwork}" width="48px" height="48px" />
             </td>
             <td>
-              <div><b>${status.t}</b></div>
-              <div><small>${status.m} — ${status.a}</small></div>
+              <div><b>${this.track}</b></div>
+              <div><small>${this.artist} ${
+          this.album ? `— ${this.album}` : ""
+        }</small></div>
             </td>
           </tr>
         </table>`
       );
+      let titleTrack = `${this.track} — ${this.artist}`;
+      if (titleTrack.length > 50) {
+        titleTrack = titleTrack.substring(0, 50 - 3) + "...";
+      }
+      this.titleTrackButton.text = titleTrack;
+      this.titleTrackButton.tooltip = tooltip;
+    } else {
+      this.titleTrackButton.text = "Not Playing";
+      this.titleTrackButton.tooltip = "Open";
     }
 
-    let text =
-      status.t && status.m ? `${status.t} — ${status.m}` : "Not Playing";
-    text = text.length > 50 ? text.substring(0, 50) + "..." : text;
-    this.titleTrackButton.text = text;
-    this.titleTrackButton.tooltip = tooltip;
+    this.previousTrackButton.text = icons.previousTrack;
+    this.previousTrackButton.tooltip = "Previous";
+    this.nextTrackButton.text = icons.nextTrack;
+    this.nextTrackButton.tooltip = "Next";
   }
 
-  private setPausedState() {
-    this.pauseTrackButton.text = "$(play)";
-    this.pauseTrackButton.tooltip = "Play";
-    this.pauseTrackButton.command = "vscode-apple-music.playTrack";
+  get muted() {
+    return this._muted;
   }
 
-  private setPlayingState() {
-    this.pauseTrackButton.text = "$(debug-pause)";
-    this.pauseTrackButton.tooltip = "Pause";
-    this.pauseTrackButton.command = "vscode-apple-music.pauseTrack";
+  set muted(muted: boolean) {
+    this._muted = muted;
+    if (muted) {
+      this.muteUnmuteTrackButton.text = icons.mute;
+      this.muteUnmuteTrackButton.tooltip = "Unmute";
+    } else {
+      this.muteUnmuteTrackButton.text = icons.unmute;
+      this.muteUnmuteTrackButton.tooltip = "Mute";
+    }
   }
 
-  private setStoppedState() {
-    this.pauseTrackButton.text = "$(play)";
-    this.pauseTrackButton.tooltip = "Play";
-    this.pauseTrackButton.command = "vscode-apple-music.open";
+  get playing() {
+    return this._playing;
   }
 
-  private setMutedState() {
-    this.muteTrackButton.text = "$(mute)";
-    this.muteTrackButton.tooltip = "Unmute";
-    this.muteTrackButton.command = "vscode-apple-music.unmuteTrack";
-  }
-
-  private setUnmutedState() {
-    this.muteTrackButton.text = "$(unmute)";
-    this.muteTrackButton.tooltip = "Mute";
-    this.muteTrackButton.command = "vscode-apple-music.muteTrack";
+  set playing(playing: boolean) {
+    this._playing = playing;
+    if (playing) {
+      this.playPauseTrackButton.text = icons.pauseTrack;
+      this.playPauseTrackButton.tooltip = "Pause";
+    } else {
+      this.playPauseTrackButton.text = icons.playTrack;
+      this.playPauseTrackButton.tooltip = "Play";
+    }
   }
 }

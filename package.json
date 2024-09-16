@@ -14,7 +14,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "publisher": "sebsojeda",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "galleryBanner": {
     "color": "#fc3c44",
     "theme": "dark"
@@ -40,13 +40,23 @@
         "category": "Apple Music"
       },
       {
-        "command": "vscode-apple-music.pauseTrack",
-        "title": "Pause",
+        "command": "vscode-apple-music.playPauseTrack",
+        "title": "Play/Pause",
         "category": "Apple Music"
       },
       {
         "command": "vscode-apple-music.playTrack",
         "title": "Play",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.pauseTrack",
+        "title": "Pause",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.muteUnmuteTrack",
+        "title": "Mute/Unmute",
         "category": "Apple Music"
       },
       {
@@ -62,6 +72,26 @@
       {
         "command": "vscode-apple-music.open",
         "title": "Open",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.volumeUp",
+        "title": "Volume Up",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.volumeDown",
+        "title": "Volume Down",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.toggleRepeat",
+        "title": "Toggle Repeat",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.toggleShuffle",
+        "title": "Toggle Shuffle",
         "category": "Apple Music"
       }
     ]

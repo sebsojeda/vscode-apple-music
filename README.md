@@ -2,21 +2,43 @@
 
 Apple Music client for Visual Studio Code.
 
+![screen shot](images/screen-shot.png)
+
 ## Features
 
-- Supported Controls
-  - Open Apple Music
-  - Play/Pause
-  - Mute/Unmute
-  - Play Previous/Next Song
+- Shows the currently playing song in the status bar.
+- Provides commands for controlling Apple Music.
+- Provides buttons for controlling Apple Music.
 
-![screen shot](images/screen-shot.png)
+## Supported Commands
+
+| Feature               | Available in Status Bar | Available as Command |
+| --------------------- | :---------------------: | :------------------: |
+| Play/Pause            |           ✅            |          ✅          |
+| Mute/Unmute           |           ✅            |          ✅          |
+| Previous Track        |           ✅            |          ✅          |
+| Next Track            |           ✅            |          ✅          |
+| Open                  |           ✅            |          ✅          |
+| Preview Album Artwork |           ✅            |          ❌          |
+| Play                  |           ❌            |          ✅          |
+| Pause                 |           ❌            |          ✅          |
+| Mute                  |           ❌            |          ✅          |
+| Unmute                |           ❌            |          ✅          |
+| Volume Up             |           ❌            |          ✅          |
+| Volume Down           |           ❌            |          ✅          |
+| Toggle Shuffle        |           ❌            |          ✅          |
+| Toggle Repeat         |           ❌            |          ✅          |
 
 ## Requirements
 
 - macOS with Apple Music
 
 ## Release Notes
+
+### 1.3.0
+
+- Add a ton of new commands
+- Fix album artwork issue causing artwork to not display in certain cases
 
 ### 1.2.3
 
