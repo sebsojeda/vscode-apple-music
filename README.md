@@ -5,6 +5,7 @@ Apple Music client for Visual Studio Code.
 ## Features
 
 - Supported Controls
+  - Open Apple Music
   - Play/Pause
   - Mute/Unmute
   - Play Previous/Next Song
@@ -16,6 +17,11 @@ Apple Music client for Visual Studio Code.
 - macOS with Apple Music
 
 ## Release Notes
+
+### 1.2.2
+
+- Add a tooltip with track and album art information
+- Fix issue with volume when muting and unmuting
 
 ### 1.2.1
 

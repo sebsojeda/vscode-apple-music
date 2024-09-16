@@ -1,5 +1,5 @@
-import { runAppleScript } from "run-applescript";
 import * as fs from "fs";
+import { runAppleScript } from "run-applescript";
 import path = require("path");
 
 export default class AppleScriptRunner {
@@ -9,9 +9,9 @@ export default class AppleScriptRunner {
     this.scriptMap = this.initializeMap();
   }
 
-  public run(script: string) {
+  public run(script: string, arg: string = "") {
     if (this.scriptMap.has(script)) {
-      return runAppleScript(this.scriptMap.get(script) as string);
+      return runAppleScript(this.scriptMap.get(script)!.replace("$ARG$", arg));
     }
     throw new Error("Script not found");
   }

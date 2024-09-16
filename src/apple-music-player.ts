@@ -9,6 +9,7 @@ export default class AppleMusicPlayer {
   public titleTrackButton: vscode.StatusBarItem;
 
   private appleScriptRunner: AppleScriptRunner;
+  private volume: number = 100;
 
   constructor(appleScriptRunner: AppleScriptRunner) {
     this.previousTrackButton = vscode.window.createStatusBarItem(
@@ -101,7 +102,7 @@ export default class AppleMusicPlayer {
    * Unmute the track
    */
   public unmuteTrack() {
-    this.appleScriptRunner.run("unmute.applescript");
+    this.appleScriptRunner.run("unmute.applescript", this.volume.toString());
     this.setUnmutedState();
   }
 
@@ -122,6 +123,7 @@ export default class AppleMusicPlayer {
   public async updateState() {
     const result = await this.appleScriptRunner.run("get-status.applescript");
     const status = JSON.parse(result);
+    this.volume = status.v;
 
     if (status.s === "paused") {
       this.setPausedState();
@@ -137,12 +139,30 @@ export default class AppleMusicPlayer {
       this.setUnmutedState();
     }
 
-    let text =
-      status.n && status.a ? `${status.n} — ${status.a}` : "Not Playing";
-    this.titleTrackButton.tooltip = text;
+    let tooltip = new vscode.MarkdownString();
+    tooltip.supportHtml = true;
+    tooltip.supportThemeIcons = true;
+    if (status.d) {
+      tooltip.appendMarkdown(
+        `<table>
+          <tr>
+            <td>
+              <img src="${status.d}" width="48px" height="48px" style="display:inline;" />
+            </td>
+            <td>
+              <div><b>${status.t}</b></div>
+              <div><small>${status.m} — ${status.a}</small></div>
+            </td>
+          </tr>
+        </table>`
+      );
+    }
 
+    let text =
+      status.t && status.m ? `${status.t} — ${status.m}` : "Not Playing";
     text = text.length > 50 ? text.substring(0, 50) + "..." : text;
     this.titleTrackButton.text = text;
+    this.titleTrackButton.tooltip = tooltip;
   }
 
   private setPausedState() {

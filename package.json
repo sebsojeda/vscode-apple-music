@@ -14,26 +14,18 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "publisher": "sebsojeda",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "galleryBanner": {
     "color": "#fc3c44",
     "theme": "dark"
   },
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:vscode-apple-music.previousTrack",
-    "onCommand:vscode-apple-music.nextTrack",
-    "onCommand:vscode-apple-music.pauseTrack",
-    "onCommand:vscode-apple-music.playTrack",
-    "onCommand:vscode-apple-music.muteTrack",
-    "onCommand:vscode-apple-music.unmuteTrack",
-    "onCommand:vscode-apple-music.open"
-  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [

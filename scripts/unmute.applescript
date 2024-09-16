@@ -1,3 +1,3 @@
 tell application "Music"
-	set the sound volume to 100
+	set the sound volume to $ARG$
 end tell
