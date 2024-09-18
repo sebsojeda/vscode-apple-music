@@ -46,6 +46,10 @@ export function activate(context: vscode.ExtensionContext) {
       ui: player.titleTrackButton,
     },
     {
+      id: commands.quit,
+      cb: () => player.quit(),
+    },
+    {
       id: commands.muteUnmuteTrack,
       cb: () => player.muteUnmuteTrack(),
       ui: player.muteUnmuteTrackButton,
@@ -74,6 +78,14 @@ export function activate(context: vscode.ExtensionContext) {
       id: commands.toggleShuffle,
       cb: () => player.toggleShuffle(),
     },
+    {
+      id: commands.show,
+      cb: () => player.show(),
+    },
+    {
+      id: commands.hide,
+      cb: () => player.hide(),
+    },
   ];
 
   config.map((command) => {
@@ -86,7 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  player.init();
+  player.show();
 }
 
 export function deactivate() {

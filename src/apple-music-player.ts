@@ -116,6 +116,15 @@ export default class AppleMusicPlayer {
    */
   public open() {
     this.appleScriptRunner.run("open.applescript");
+    this.show();
+  }
+
+  /**
+   * Quit Apple Music
+   */
+  public quit() {
+    this.appleScriptRunner.run("quit.applescript");
+    this.hide();
   }
 
   /**
@@ -204,9 +213,9 @@ export default class AppleMusicPlayer {
   }
 
   /**
-   * Initialize the player
+   * Show the player
    */
-  public async init() {
+  public show() {
     this.startRefresh();
     this.previousTrackButton.show();
     this.playPauseTrackButton.show();
@@ -216,15 +225,27 @@ export default class AppleMusicPlayer {
   }
 
   /**
+   * Hide the player
+   */
+  public hide() {
+    this.stopRefresh();
+    this.previousTrackButton.hide();
+    this.playPauseTrackButton.hide();
+    this.nextTrackButton.hide();
+    this.titleTrackButton.hide();
+    this.muteUnmuteTrackButton.hide();
+  }
+
+  /**
    * Dispose of the UI
    */
   public dispose() {
+    this.stopRefresh();
     this.previousTrackButton.dispose();
     this.playPauseTrackButton.dispose();
     this.nextTrackButton.dispose();
     this.titleTrackButton.dispose();
     this.muteUnmuteTrackButton.dispose();
-    this.stopRefresh();
   }
 
   private stopRefresh() {
@@ -235,6 +256,9 @@ export default class AppleMusicPlayer {
   }
 
   private async startRefresh() {
+    if (this.interval) {
+      return;
+    }
     await this.syncPlayerState();
     this.interval = setInterval(
       () => this.syncPlayerState(),

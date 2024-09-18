@@ -19,6 +19,7 @@ Apple Music client for Visual Studio Code.
 | Previous Track        |           ✅            |          ✅          |
 | Next Track            |           ✅            |          ✅          |
 | Open                  |           ✅            |          ✅          |
+| Quit                  |           ❌            |          ✅          |
 | Preview Album Artwork |           ✅            |          ❌          |
 | Play                  |           ❌            |          ✅          |
 | Pause                 |           ❌            |          ✅          |
@@ -28,12 +29,19 @@ Apple Music client for Visual Studio Code.
 | Volume Down           |           ❌            |          ✅          |
 | Toggle Shuffle        |           ❌            |          ✅          |
 | Toggle Repeat         |           ❌            |          ✅          |
+| Show Player           |           ❌            |          ✅          |
+| Hide Player           |           ❌            |          ✅          |
 
 ## Requirements
 
 - macOS with Apple Music
 
 ## Release Notes
+
+### 1.4.0
+
+- Add show/hide commands
+- Add quit command
 
 ### 1.3.0
 

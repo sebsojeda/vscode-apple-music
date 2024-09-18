@@ -12,8 +12,11 @@ export const commands = {
   volumeUp: "vscode-apple-music.volumeUp",
   volumeDown: "vscode-apple-music.volumeDown",
   open: "vscode-apple-music.open",
-  toggleRepeat: "vscode-apple-music.toggleRepeat",
+  quit: "vscode-apple-music.quit",
   toggleShuffle: "vscode-apple-music.toggleShuffle",
+  toggleRepeat: "vscode-apple-music.toggleRepeat",
+  show: "vscode-apple-music.showPlayer",
+  hide: "vscode-apple-music.hidePlayer",
 };
 
 export const icons = {

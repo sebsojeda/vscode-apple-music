@@ -14,7 +14,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "publisher": "sebsojeda",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "galleryBanner": {
     "color": "#fc3c44",
     "theme": "dark"
@@ -75,6 +75,11 @@
         "category": "Apple Music"
       },
       {
+        "command": "vscode-apple-music.quit",
+        "title": "Quit",
+        "category": "Apple Music"
+      },
+      {
         "command": "vscode-apple-music.volumeUp",
         "title": "Volume Up",
         "category": "Apple Music"
@@ -92,6 +97,16 @@
       {
         "command": "vscode-apple-music.toggleShuffle",
         "title": "Toggle Shuffle",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.showPlayer",
+        "title": "Show Player",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.hidePlayer",
+        "title": "Hide Player",
         "category": "Apple Music"
       }
     ]
