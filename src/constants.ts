@@ -17,6 +17,8 @@ export const commands = {
   toggleRepeat: "vscode-apple-music.toggleRepeat",
   show: "vscode-apple-music.showPlayer",
   hide: "vscode-apple-music.hidePlayer",
+  addToLibrary: "vscode-apple-music.addToLibrary",
+  addToPlaylist: "vscode-apple-music.addToPlaylist",
 };
 
 export const icons = {
@@ -28,4 +30,15 @@ export const icons = {
   unmute: "$(unmute)",
   favorite: "$(star-full)",
   unfavorite: "$(star)",
+  playlist: "$(list-selection)",
+  plus: "$(plus)",
+};
+
+export const notifications = {
+  notPlaying: "Apple Music is not playing.",
+  playlistExists: (p: string) => `Playlist '${p}' already exists.`,
+  unableToCreatePlaylist: (p: string) => `Unable to create playlist '${p}'.`,
+  unableToAddToPlaylist: (p: string) => `Unable to add to '${p}'.`,
+  addingToPlaylist: (p: string) => `Adding to '${p}'.`,
+  addedToPlaylist: (p: string) => `Added to '${p}'.`,
 };

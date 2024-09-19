@@ -1,42 +1,76 @@
 # Apple Music Player - Visual Studio Code
 
-Apple Music client for Visual Studio Code.
+Apple Music client for Visual Studio Code — _only available for macOS_
 
-![screen shot](images/screen-shot.png)
+![Screen Shot](images/screenshot.png)
 
 ## Features
 
 - Shows the currently playing song in the status bar.
-- Provides commands for controlling Apple Music.
+- Provides [commands](#supported-commands) for controlling Apple Music.
+- Provides [keybindings](#supported-commands) for controlling Apple Music.
 - Provides buttons for controlling Apple Music.
+- Provides [configuration](#configuration) for the status bar items.
 
 ## Supported Commands
 
-| Feature               | Available in Status Bar | Available as Command |
-| --------------------- | :---------------------: | :------------------: |
-| Play/Pause            |           ✅            |          ✅          |
-| Mute/Unmute           |           ✅            |          ✅          |
-| Previous Track        |           ✅            |          ✅          |
-| Next Track            |           ✅            |          ✅          |
-| Open                  |           ✅            |          ✅          |
-| Quit                  |           ❌            |          ✅          |
-| Preview Album Artwork |           ✅            |          ❌          |
-| Play                  |           ❌            |          ✅          |
-| Pause                 |           ❌            |          ✅          |
-| Mute                  |           ❌            |          ✅          |
-| Unmute                |           ❌            |          ✅          |
-| Volume Up             |           ❌            |          ✅          |
-| Volume Down           |           ❌            |          ✅          |
-| Toggle Shuffle        |           ❌            |          ✅          |
-| Toggle Repeat         |           ❌            |          ✅          |
-| Show Player           |           ❌            |          ✅          |
-| Hide Player           |           ❌            |          ✅          |
+| Feature               | Available in Status Bar | Available as Command | Keybinding        |
+| --------------------- | :---------------------: | :------------------: | ----------------- |
+| Play/Pause            |           ✅            |          ✅          | `Cmd+Shift+Space` |
+| Mute/Unmute           |           ✅            |          ✅          |                   |
+| Previous Track        |           ✅            |          ✅          | `Cmd+Shift+Left`  |
+| Next Track            |           ✅            |          ✅          | `Cmd+Shift+Right` |
+| Open                  |           ✅            |          ✅          |                   |
+| Quit                  |           ❌            |          ✅          |                   |
+| Preview Album Artwork |           ✅            |          ❌          |                   |
+| Add to Library        |           ❌            |          ✅          |                   |
+| Add to Playlist       |           ❌            |          ✅          |                   |
+| Add to New Playlist   |           ❌            |          ✅          |                   |
+| Play                  |           ❌            |          ✅          |                   |
+| Pause                 |           ❌            |          ✅          |                   |
+| Mute                  |           ❌            |          ✅          |                   |
+| Unmute                |           ❌            |          ✅          |                   |
+| Volume Up             |           ❌            |          ✅          | `Cmd+Shift+Up`    |
+| Volume Down           |           ❌            |          ✅          | `Cmd+Shift+Down`  |
+| Toggle Shuffle        |           ❌            |          ✅          |                   |
+| Toggle Repeat         |           ❌            |          ✅          |                   |
+| Show Player           |           ❌            |          ✅          |                   |
+| Hide Player           |           ❌            |          ✅          |                   |
+
+## Configuration
+
+```jsonc
+{
+  // Show the currently playing track in the status bar.
+  "vscodeAppleMusic.showTrackInStatusBar": true,
+  // Time interval (in milliseconds) to update the currently playing track.
+  "vscodeAppleMusic.trackUpdateInterval": 1000,
+  // The step size for volume control.
+  "vscodeAppleMusic.volumeStep": 6.25,
+  // Show the Previous button in the status bar.
+  "vscodeAppleMusic.showPreviousButton": true,
+  // Show the Play/Pause button in the status bar.
+  "vscodeAppleMusic.showPlayPauseButton": true,
+  // Show the Next button in the status bar.
+  "vscodeAppleMusic.showNextButton": true,
+  // Show the Mute button in the status bar.
+  "vscodeAppleMusic.showMuteButton": true
+}
+```
 
 ## Requirements
 
 - macOS with Apple Music
 
 ## Release Notes
+
+### 1.5.0
+
+- Add 'Add to Library'
+- Add 'Add to Playlist'
+- Add ability to create a new playlist
+- Add default keybindings
+- Add configuration options
 
 ### 1.4.0
 

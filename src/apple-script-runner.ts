@@ -10,8 +10,11 @@ export default class AppleScriptRunner {
   }
 
   public run(script: string, arg: string = "") {
-    if (this.scriptMap.has(script)) {
-      return runAppleScript(this.scriptMap.get(script)!.replace("$ARG$", arg));
+    let rawScript = `${script}.applescript`;
+    if (this.scriptMap.has(rawScript)) {
+      return runAppleScript(
+        this.scriptMap.get(rawScript)!.replace("$ARG$", arg)
+      );
     }
     throw new Error("Script not found");
   }

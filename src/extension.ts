@@ -86,6 +86,14 @@ export function activate(context: vscode.ExtensionContext) {
       id: commands.hide,
       cb: () => player.hide(),
     },
+    {
+      id: commands.addToLibrary,
+      cb: () => player.addToLibrary(),
+    },
+    {
+      id: commands.addToPlaylist,
+      cb: () => player.addToPlaylist(),
+    },
   ];
 
   config.map((command) => {
@@ -99,6 +107,12 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   player.show();
+
+  vscode.workspace.onDidChangeConfiguration((event) => {
+    if (event.affectsConfiguration("vscodeAppleMusic")) {
+      player.updateConfiguration();
+    }
+  });
 }
 
 export function deactivate() {

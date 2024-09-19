@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import AppleScriptRunner from "./apple-script-runner";
-import { icons } from "./constants";
+import { icons, notifications } from "./constants";
 
 type Status = {
   a: string | null;
@@ -11,6 +11,10 @@ type Status = {
   d: string | null;
 };
 
+type StatusReponse = {
+  status: "ok" | "error" | "exists";
+};
+
 export default class AppleMusicPlayer {
   public previousTrackButton: vscode.StatusBarItem;
   public playPauseTrackButton: vscode.StatusBarItem;
@@ -19,7 +23,6 @@ export default class AppleMusicPlayer {
   public muteUnmuteTrackButton: vscode.StatusBarItem;
 
   private appleScriptRunner: AppleScriptRunner;
-  private refreshInterval: number;
   private interval: NodeJS.Timeout | undefined;
 
   private album: string | null = null;
@@ -30,10 +33,25 @@ export default class AppleMusicPlayer {
   private _muted: boolean = false;
   private _playing: boolean = false;
 
-  constructor(
-    appleScriptRunner: AppleScriptRunner,
-    refreshInterval: number = 1000
-  ) {
+  private showTrackInStatusBar: boolean;
+  private trackUpdateInterval: number;
+  private volumeStep: number;
+  private showPreviousButton: boolean;
+  private showPlayPauseButton: boolean;
+  private showNextButton: boolean;
+  private showMuteButton: boolean;
+
+  constructor(appleScriptRunner: AppleScriptRunner) {
+    const config = vscode.workspace.getConfiguration("vscodeAppleMusic");
+
+    this.showTrackInStatusBar = config.get("showTrackInStatusBar", true);
+    this.trackUpdateInterval = config.get("trackUpdateInterval", 1000);
+    this.volumeStep = config.get("volumeStep", 6.25);
+    this.showPreviousButton = config.get("showPreviousButton", true);
+    this.showPlayPauseButton = config.get("showPlayPauseButton", true);
+    this.showNextButton = config.get("showNextButton", true);
+    this.showMuteButton = config.get("showMuteButton", true);
+
     this.previousTrackButton = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left,
       5
@@ -54,8 +72,26 @@ export default class AppleMusicPlayer {
       vscode.StatusBarAlignment.Left,
       1
     );
+
     this.appleScriptRunner = appleScriptRunner;
-    this.refreshInterval = refreshInterval;
+  }
+
+  /**
+   * Update configuration
+   */
+  public updateConfiguration() {
+    const config = vscode.workspace.getConfiguration("vscodeAppleMusic");
+
+    this.showTrackInStatusBar = config.get("showTrackInStatusBar", true);
+    this.trackUpdateInterval = config.get("trackUpdateInterval", 1000);
+    this.volumeStep = config.get("volumeStep", 6.25);
+    this.showPreviousButton = config.get("showPreviousButton", true);
+    this.showPlayPauseButton = config.get("showPlayPauseButton", true);
+    this.showNextButton = config.get("showNextButton", true);
+    this.showMuteButton = config.get("showMuteButton", true);
+
+    this.stopRefresh();
+    this.show();
   }
 
   /**
@@ -63,7 +99,12 @@ export default class AppleMusicPlayer {
    */
   public async playPreviousTrack() {
     this.stopRefresh();
-    await this.appleScriptRunner.run("previous-track.applescript");
+    await this.syncPlayerState();
+    if (!this.track || !this.artist) {
+      vscode.window.showErrorMessage(notifications.notPlaying);
+    } else {
+      await this.appleScriptRunner.run("previous-track");
+    }
     this.startRefresh();
   }
 
@@ -72,7 +113,12 @@ export default class AppleMusicPlayer {
    */
   public async playNextTrack() {
     this.stopRefresh();
-    await this.appleScriptRunner.run("next-track.applescript");
+    await this.syncPlayerState();
+    if (!this.track || !this.artist) {
+      vscode.window.showErrorMessage(notifications.notPlaying);
+    } else {
+      await this.appleScriptRunner.run("next-track");
+    }
     this.startRefresh();
   }
 
@@ -80,15 +126,11 @@ export default class AppleMusicPlayer {
    * Play/Pause track
    */
   public async playPauseTrack() {
-    this.stopRefresh();
     if (this.playing) {
-      await this.appleScriptRunner.run("pause.applescript");
-      this.playing = false;
+      await this.pauseTrack();
     } else {
-      await this.appleScriptRunner.run("play.applescript");
-      this.playing = true;
+      await this.playTrack();
     }
-    this.startRefresh();
   }
 
   /**
@@ -96,7 +138,7 @@ export default class AppleMusicPlayer {
    */
   public async playTrack() {
     this.stopRefresh();
-    await this.appleScriptRunner.run("play.applescript");
+    await this.appleScriptRunner.run("play");
     this.playing = true;
     this.startRefresh();
   }
@@ -106,7 +148,7 @@ export default class AppleMusicPlayer {
    */
   public async pauseTrack() {
     this.stopRefresh();
-    await this.appleScriptRunner.run("pause.applescript");
+    await this.appleScriptRunner.run("pause");
     this.playing = false;
     this.startRefresh();
   }
@@ -115,7 +157,7 @@ export default class AppleMusicPlayer {
    * Open Apple Music
    */
   public open() {
-    this.appleScriptRunner.run("open.applescript");
+    this.appleScriptRunner.run("open");
     this.show();
   }
 
@@ -123,7 +165,7 @@ export default class AppleMusicPlayer {
    * Quit Apple Music
    */
   public quit() {
-    this.appleScriptRunner.run("quit.applescript");
+    this.appleScriptRunner.run("quit");
     this.hide();
   }
 
@@ -131,18 +173,11 @@ export default class AppleMusicPlayer {
    * Mute/Unmute track
    */
   public async muteUnmuteTrack() {
-    this.stopRefresh();
     if (this.muted) {
-      await this.appleScriptRunner.run(
-        "set-volume.applescript",
-        `${this.volume}`
-      );
-      this.muted = false;
+      await this.unmuteTrack();
     } else {
-      await this.appleScriptRunner.run("set-volume.applescript", "0");
-      this.muted = true;
+      await this.muteTrack();
     }
-    this.startRefresh();
   }
 
   /**
@@ -150,7 +185,7 @@ export default class AppleMusicPlayer {
    */
   public async muteTrack() {
     this.stopRefresh();
-    await this.appleScriptRunner.run("set-volume.applescript", "0");
+    await this.appleScriptRunner.run("set-volume", "0");
     this.muted = true;
     this.startRefresh();
   }
@@ -160,10 +195,7 @@ export default class AppleMusicPlayer {
    */
   public async unmuteTrack() {
     this.stopRefresh();
-    await this.appleScriptRunner.run(
-      "set-volume.applescript",
-      `${this.volume}`
-    );
+    await this.appleScriptRunner.run("set-volume", `${this.volume}`);
     this.muted = false;
     this.startRefresh();
   }
@@ -173,11 +205,8 @@ export default class AppleMusicPlayer {
    */
   public async volumeUp() {
     this.stopRefresh();
-    this.volume = Math.min(100, this.volume + 6.25);
-    await this.appleScriptRunner.run(
-      "set-volume.applescript",
-      `${this.volume}`
-    );
+    this.volume = Math.min(100, this.volume + this.volumeStep);
+    await this.appleScriptRunner.run("set-volume", `${this.volume}`);
     this.startRefresh();
   }
 
@@ -186,11 +215,8 @@ export default class AppleMusicPlayer {
    */
   public async volumeDown() {
     this.stopRefresh();
-    this.volume = Math.max(0, this.volume - 6.25);
-    await this.appleScriptRunner.run(
-      "set-volume.applescript",
-      `${this.volume}`
-    );
+    this.volume = Math.max(0, this.volume - this.volumeStep);
+    await this.appleScriptRunner.run("set-volume", `${this.volume}`);
     this.startRefresh();
   }
 
@@ -198,18 +224,89 @@ export default class AppleMusicPlayer {
    * Toggle repeat
    */
   public async toggleRepeat() {
-    this.stopRefresh();
-    await this.appleScriptRunner.run("toggle-repeat.applescript");
-    this.startRefresh();
+    await this.appleScriptRunner.run("toggle-repeat");
   }
 
   /**
    * Toggle shuffle
    */
   public async toggleShuffle() {
-    this.stopRefresh();
-    await this.appleScriptRunner.run("toggle-shuffle.applescript");
-    this.startRefresh();
+    await this.appleScriptRunner.run("toggle-shuffle");
+  }
+
+  /**
+   * Add to Library
+   */
+  public async addToLibrary() {
+    await this.syncPlayerState();
+    if (!this.track || !this.artist) {
+      vscode.window.showErrorMessage(notifications.notPlaying);
+      return;
+    }
+    let result = await this.appleScriptRunner.run("add-to-library");
+    let { status } = JSON.parse(result) as StatusReponse;
+    if (status !== "ok") {
+      vscode.window.showErrorMessage(
+        notifications.unableToAddToPlaylist("Library")
+      );
+    } else {
+      vscode.window.showInformationMessage(
+        notifications.addedToPlaylist("Library")
+      );
+    }
+  }
+
+  /**
+   * Add to Playlist
+   */
+  public async addToPlaylist() {
+    await this.syncPlayerState();
+    if (!this.track || !this.artist) {
+      vscode.window.showErrorMessage(notifications.notPlaying);
+      return;
+    }
+    let choice = await this.choosePlaylist();
+    if (!choice) {
+      return;
+    }
+    let { playlist, create } = choice;
+    vscode.window.withProgress(
+      {
+        title: notifications.addingToPlaylist(playlist),
+        location: vscode.ProgressLocation.Notification,
+      },
+      async () => {
+        if (create) {
+          let { status } = await this.createPlaylist(playlist);
+          if (status !== "ok") {
+            if (status === "exists") {
+              vscode.window.showErrorMessage(
+                notifications.playlistExists(playlist)
+              );
+            } else {
+              vscode.window.showErrorMessage(
+                notifications.unableToAddToPlaylist(playlist)
+              );
+            }
+            return;
+          }
+        }
+        let result = await this.appleScriptRunner.run(
+          "add-to-playlist",
+          playlist
+        );
+        let { status } = JSON.parse(result) as StatusReponse;
+        if (status !== "ok") {
+          vscode.window.showErrorMessage(
+            notifications.unableToAddToPlaylist(playlist)
+          );
+        } else {
+          vscode.window.showInformationMessage(
+            notifications.addedToPlaylist(playlist)
+          );
+        }
+      }
+    );
   }
 
   /**
@@ -217,11 +314,21 @@ export default class AppleMusicPlayer {
    */
   public show() {
     this.startRefresh();
-    this.previousTrackButton.show();
-    this.playPauseTrackButton.show();
-    this.nextTrackButton.show();
-    this.titleTrackButton.show();
-    this.muteUnmuteTrackButton.show();
+    this.showPreviousButton
+      ? this.previousTrackButton.show()
+      : this.previousTrackButton.hide();
+    this.showPlayPauseButton
+      ? this.playPauseTrackButton.show()
+      : this.playPauseTrackButton.hide();
+    this.showNextButton
+      ? this.nextTrackButton.show()
+      : this.nextTrackButton.hide();
+    this.showTrackInStatusBar
+      ? this.titleTrackButton.show()
+      : this.titleTrackButton.hide();
+    this.showMuteButton
+      ? this.muteUnmuteTrackButton.show()
+      : this.muteUnmuteTrackButton.hide();
   }
 
   /**
@@ -248,6 +355,42 @@ export default class AppleMusicPlayer {
     this.muteUnmuteTrackButton.dispose();
   }
 
+  private async createPlaylist(name: string) {
+    let result = await this.appleScriptRunner.run("create-playlist", name);
+    let data = JSON.parse(result) as StatusReponse;
+    return data;
+  }
+
+  private async choosePlaylist() {
+    let result = await this.appleScriptRunner.run("get-playlists");
+    let data = JSON.parse(result);
+    let create = false;
+    let playlists = data.map(
+      (playlist: string) => `${icons.playlist} ${playlist}`
+    );
+    let playlist: string | undefined = await vscode.window.showQuickPick(
+      [`${icons.plus} New Playlist`, ...playlists],
+      {
+        placeHolder: "Select Playlist",
+      }
+    );
+    if (!playlist) {
+      return undefined;
+    }
+    if (playlist.startsWith(icons.plus)) {
+      create = true;
+      playlist = await vscode.window.showInputBox({
+        placeHolder: "Playlist Title",
+      });
+      if (!playlist) {
+        return undefined;
+      }
+    } else {
+      playlist = playlist.replace(`${icons.playlist} `, "");
+    }
+    return { playlist, create };
+  }
+
   private stopRefresh() {
     if (this.interval) {
       clearInterval(this.interval);
@@ -262,12 +405,12 @@ export default class AppleMusicPlayer {
     await this.syncPlayerState();
     this.interval = setInterval(
       () => this.syncPlayerState(),
-      this.refreshInterval
+      this.trackUpdateInterval
     );
   }
 
   private async syncPlayerState() {
-    const results = await this.appleScriptRunner.run("get-status.applescript");
+    const results = await this.appleScriptRunner.run("get-status");
     const status = JSON.parse(results) as Status;
 
     this.album = status.a;

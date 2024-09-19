@@ -14,7 +14,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "publisher": "sebsojeda",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "galleryBanner": {
     "color": "#fc3c44",
     "theme": "dark"
@@ -28,6 +28,74 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Apple Music Player Settings",
+      "properties": {
+        "vscodeAppleMusic.showTrackInStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the currently playing track in the status bar."
+        },
+        "vscodeAppleMusic.trackUpdateInterval": {
+          "type": "number",
+          "default": 1000,
+          "description": "Time interval (in milliseconds) to update the currently playing track."
+        },
+        "vscodeAppleMusic.volumeStep": {
+          "type": "number",
+          "default": 6.25,
+          "description": "The step size for volume control."
+        },
+        "vscodeAppleMusic.showPreviousButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Previous button in the status bar."
+        },
+        "vscodeAppleMusic.showPlayPauseButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Play/Pause button in the status bar."
+        },
+        "vscodeAppleMusic.showNextButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Next button in the status bar."
+        },
+        "vscodeAppleMusic.showMuteButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Mute button in the status bar."
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "vscode-apple-music.playPauseTrack",
+        "key": "ctrl+alt+space",
+        "mac": "cmd+shift+space"
+      },
+      {
+        "command": "vscode-apple-music.nextTrack",
+        "key": "ctrl+alt+right",
+        "mac": "cmd+shift+right"
+      },
+      {
+        "command": "vscode-apple-music.previousTrack",
+        "key": "ctrl+alt+left",
+        "mac": "cmd+shift+left"
+      },
+      {
+        "command": "vscode-apple-music.volumeUp",
+        "key": "ctrl+alt+up",
+        "mac": "cmd+shift+up"
+      },
+      {
+        "command": "vscode-apple-music.volumeDown",
+        "key": "ctrl+alt+down",
+        "mac": "cmd+shift+down"
+      }
+    ],
     "commands": [
       {
         "command": "vscode-apple-music.previousTrack",
@@ -107,6 +175,16 @@
       {
         "command": "vscode-apple-music.hidePlayer",
         "title": "Hide Player",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.addToLibrary",
+        "title": "Add to Library",
+        "category": "Apple Music"
+      },
+      {
+        "command": "vscode-apple-music.addToPlaylist",
+        "title": "Add to Playlist",
         "category": "Apple Music"
       }
     ]
