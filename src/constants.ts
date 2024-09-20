@@ -19,6 +19,8 @@ export const commands = {
   hide: "vscode-apple-music.hidePlayer",
   addToLibrary: "vscode-apple-music.addToLibrary",
   addToPlaylist: "vscode-apple-music.addToPlaylist",
+  playPlaylist: "vscode-apple-music.playPlaylist",
+  shufflePlaylist: "vscode-apple-music.shufflePlaylist",
 };
 
 export const icons = {

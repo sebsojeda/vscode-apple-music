@@ -20,6 +20,8 @@ Apple Music client for Visual Studio Code — _only available for macOS_
 | Mute/Unmute           |           ✅            |          ✅          |                   |
 | Previous Track        |           ✅            |          ✅          | `Cmd+Shift+Left`  |
 | Next Track            |           ✅            |          ✅          | `Cmd+Shift+Right` |
+| Play Playlist         |           ❌            |          ✅          |                   |
+| Shuffle Playlist      |           ❌            |          ✅          |                   |
 | Open                  |           ✅            |          ✅          |                   |
 | Quit                  |           ❌            |          ✅          |                   |
 | Preview Album Artwork |           ✅            |          ❌          |                   |
@@ -63,6 +65,12 @@ Apple Music client for Visual Studio Code — _only available for macOS_
 - macOS with Apple Music
 
 ## Release Notes
+
+### 1.6.0
+
+- Add 'Play Playlist'
+- Add 'Shuffle Playlist'
+- Migrate tooling
 
 ### 1.5.0
 

@@ -1,3 +1,3 @@
 tell application "Music"
-	play
+	  play
 end tell

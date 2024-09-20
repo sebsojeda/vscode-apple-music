@@ -310,6 +310,32 @@ export default class AppleMusicPlayer {
   }
 
   /**
+   * Play playlist
+   */
+  public async playPlaylist(shuffle: boolean) {
+    let result = await this.appleScriptRunner.run("get-all-playlists");
+    let data = JSON.parse(result);
+    let playlists = data.map(
+      (playlist: string) => `${icons.playlist} ${playlist}`
+    );
+    let playlist: string | undefined = await vscode.window.showQuickPick(
+      playlists,
+      {
+        placeHolder: "Select Playlist",
+      }
+    );
+    if (!playlist) {
+      return undefined;
+    }
+    playlist = playlist.replace(`${icons.playlist} `, "");
+    if (shuffle) {
+      await this.appleScriptRunner.run("shuffle-playlist", playlist);
+    } else {
+      await this.appleScriptRunner.run("play-playlist", playlist);
+    }
+  }
+
+  /**
    * Show the player
    */
   public show() {
@@ -362,7 +388,7 @@ export default class AppleMusicPlayer {
   }
 
   private async choosePlaylist() {
-    let result = await this.appleScriptRunner.run("get-playlists");
+    let result = await this.appleScriptRunner.run("get-user-playlists");
     let data = JSON.parse(result);
     let create = false;
     let playlists = data.map(

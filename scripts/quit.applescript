@@ -1,3 +1,3 @@
 tell application "Music"
-	quit
+	  quit
 end tell

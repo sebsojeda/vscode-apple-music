@@ -1,3 +1,3 @@
 tell application "Music"
-	pause
+	  pause
 end tell

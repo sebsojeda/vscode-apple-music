@@ -94,6 +94,14 @@ export function activate(context: vscode.ExtensionContext) {
       id: commands.addToPlaylist,
       cb: () => player.addToPlaylist(),
     },
+    {
+      id: commands.playPlaylist,
+      cb: () => player.playPlaylist(false),
+    },
+    {
+      id: commands.shufflePlaylist,
+      cb: () => player.playPlaylist(true),
+    },
   ];
 
   config.map((command) => {
