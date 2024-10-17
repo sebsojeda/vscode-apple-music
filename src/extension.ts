@@ -114,7 +114,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  player.show();
+  if (
+    vscode.workspace
+      .getConfiguration("vscodeAppleMusic")
+      .get("showOnStartup", true)
+  ) {
+    player.show();
+  }
 
   vscode.workspace.onDidChangeConfiguration((event) => {
     if (event.affectsConfiguration("vscodeAppleMusic")) {

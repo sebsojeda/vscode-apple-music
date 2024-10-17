@@ -56,7 +56,9 @@ Apple Music client for Visual Studio Code — _only available for macOS_
   // Show the Next button in the status bar.
   "vscodeAppleMusic.showNextButton": true,
   // Show the Mute button in the status bar.
-  "vscodeAppleMusic.showMuteButton": true
+  "vscodeAppleMusic.showMuteButton": true,
+  // Show the player on startup.
+  "vscodeAppleMusic.showOnStartup": true
 }
 ```
 
@@ -65,6 +67,11 @@ Apple Music client for Visual Studio Code — _only available for macOS_
 - macOS with Apple Music
 
 ## Release Notes
+
+### 1.7.0
+
+- Add 'showOnStartup' configuration
+- Fix issue with albumn names containing quotes
 
 ### 1.6.0
 

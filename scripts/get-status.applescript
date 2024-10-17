@@ -30,7 +30,12 @@ if application "Music" is running then
                     error
                 end try
             end if
-            return "{\"a\":\"" & album of current track & "\",\"m\":\"" & artist of current track & "\",\"t\":\"" & name of current track & "\",\"s\":\"" & player state & "\",\"v\":" & sound volume & ",\"d\":\"" & filePath & "\"}"
+
+            set albumnName to my escapeJSON(album of current track)
+            set artistName to my escapeJSON(artist of current track)
+            set trackName to my escapeJSON(name of current track)
+
+            return "{\"a\":\"" & albumnName & "\",\"m\":\"" & artistName & "\",\"t\":\"" & trackName & "\",\"s\":\"" & player state & "\",\"v\":" & sound volume & ",\"d\":\"" & filePath & "\"}"
         on error
             return "{\"a\":null,\"m\":null,\"t\":null,\"s\":\"" & player state & "\",\"v\":" & sound volume & ",\"d\":null}"
         end try
@@ -38,6 +43,15 @@ if application "Music" is running then
 else
     return "{\"a\":null,\"m\":null,\"t\":null,\"s\":null,\"v\":null,\"d\":null}"
 end if
+
+on escapeJSON(value)
+    set AppleScript's text item delimiters to "\""
+    set value to text items of value
+    set AppleScript's text item delimiters to "\\\""
+    set value to value as text
+    set AppleScript's text item delimiters to ""
+    return value
+end escapeJSON
 
 on replace_chars(theText, searchString, replacementString)
     set AppleScript's text item delimiters to searchString
