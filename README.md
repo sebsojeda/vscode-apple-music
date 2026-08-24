@@ -74,7 +74,7 @@ If commands do not work, run **Apple Music: Check Setup** from the Command Palet
 
 ## Release Notes
 
-### 1.8.0
+### 1.9.0 (Unreleased)
 
 - Add a Now Playing action menu, favorites, library search, seeking and restart controls, direct volume and repeat selection, track copying, and reveal-in-Music support.
 - Add configurable seek steps.
@@ -85,6 +85,13 @@ If commands do not work, run **Apple Music: Check Setup** from the Command Palet
 - Streamline the Command Palette with state-aware favorite and status-bar actions, unified track and playlist search, and one workspace soundtrack manager.
 - Remove bundled keybindings and the advanced polling setting from the public configuration surface.
 - Hide Quit Music from the Command Palette while retaining its legacy command ID.
+
+### 1.8.1
+
+- Fix playlist commands for names containing quotes or other special characters.
+- Fix malformed playlist and now-playing data when names or metadata contain JSON-sensitive characters.
+- Fix Add to Playlist targeting duplicate tracks with the same artist and title; it now uses the current track's persistent ID.
+- Keep now-playing information visible when artwork is missing or unreadable, and render local artwork correctly.
 
 ### 1.7.0
 
