@@ -1,27 +1,29 @@
-tell application "Music"
-    try
-        set playlistName to "$ARG$"
-
-        if not (exists user playlist playlistName) then
-            make new user playlist with properties {name:playlistName}
-            
-            set maxAttempts to 5
-            set attempts to 0
-            repeat until (exists user playlist playlistName) or attempts > maxAttempts
-                delay 1
-                set attempts to attempts + 1
-            end repeat
+on run argv
+    set playlistName to item 1 of argv
+    tell application "Music"
+        try
 
             if not (exists user playlist playlistName) then
-                return "{\"status\":\"error\"}"
-            end if
+                make new user playlist with properties {name:playlistName}
             
-        else
-            return "{\"status\":\"exists\"}"
-        end if
+                set maxAttempts to 5
+                set attempts to 0
+                repeat until (exists user playlist playlistName) or attempts > maxAttempts
+                    delay 1
+                    set attempts to attempts + 1
+                end repeat
 
-        return "{\"status\":\"ok\"}"
-    on error
-        return "{\"status\":\"error\"}"
-    end try
-end tell
+                if not (exists user playlist playlistName) then
+                    return "{\"status\":\"error\"}"
+                end if
+            
+            else
+                return "{\"status\":\"exists\"}"
+            end if
+
+            return "{\"status\":\"ok\"}"
+        on error
+            return "{\"status\":\"error\"}"
+        end try
+    end tell
+end run

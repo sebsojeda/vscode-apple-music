@@ -1,22 +1,23 @@
+use framework "Foundation"
+
 if application "Music" is running then
-    tell application "Music"
-        set playlistNames to name of playlists
-        set playlistsJSON to "["
-        set listCount to (count of playlistNames)
+    tell application "Music" to set playlistNames to name of playlists
+    set selectablePlaylists to {}
 
-        repeat with i from 1 to listCount
-            set playlistName to item i of playlistNames
-            if (playlistName is not "Music") and (playlistName is not "Library") then
-                set playlistsJSON to playlistsJSON & "\"" & playlistName & "\""        
-                if i is not listCount then
-                    set playlistsJSON to playlistsJSON & ", "
-                end if
-            end if
-        end repeat
+    repeat with playlistName in playlistNames
+        set playlistName to playlistName as text
+        if (playlistName is not "Music") and (playlistName is not "Library") then
+            set end of selectablePlaylists to playlistName
+        end if
+    end repeat
 
-        set playlistsJSON to playlistsJSON & "]"
-        return playlistsJSON
-    end tell
+    return my serializeJSON(selectablePlaylists)
 else
     return "[]"
 end if
+
+on serializeJSON(value)
+    set jsonData to current application's NSJSONSerialization's dataWithJSONObject:value options:0 |error|:(missing value)
+    set jsonString to current application's NSString's alloc()'s initWithData:jsonData encoding:(current application's NSUTF8StringEncoding)
+    return jsonString as text
+end serializeJSON

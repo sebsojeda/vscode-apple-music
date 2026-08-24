@@ -1,63 +1,92 @@
+use framework "Foundation"
+use scripting additions
+
 if application "Music" is running then
     tell application "Music"
         try
-            set currentAlbumData to data of artwork 1 of current track
-
-            set albumName to artist of current track & "_" & album of current track
-            set safeAlbumName to my replace_chars(albumName, "/", "_")
-            set safeAlbumName to my replace_chars(safeAlbumName, ":", "_")
-            set safeAlbumName to my replace_chars(safeAlbumName, "\\", "_")
-            set safeAlbumName to my replace_chars(safeAlbumName, " ", "_")
-            set safeAlbumName to my replace_chars(safeAlbumName, "-", "_")
-
-            set tempPath to POSIX path of (path to temporary items from user domain)
-            set filePath to tempPath & safeAlbumName & ".jpg"
-
-            tell application "System Events"
-                set fileExists to exists file filePath
-            end tell
-
-            if not fileExists then
-                try
-                    set fileDescriptor to open for access filePath with write permission
-                    set eof of fileDescriptor to 0
-                    write currentAlbumData to fileDescriptor starting at eof
-                    close access fileDescriptor
-                on error
-                    try
-                        close access filePath
-                    end try
-                    error
-                end try
+            set albumName to album of current track
+            set artistName to artist of current track
+            set trackName to name of current track
+            if player state is playing then
+                set playbackState to "playing"
+            else if player state is paused then
+                set playbackState to "paused"
+            else
+                set playbackState to "stopped"
             end if
+            set playerVolume to sound volume
+            set artworkPath to missing value
 
-            set albumnName to my escapeJSON(album of current track)
-            set artistName to my escapeJSON(artist of current track)
-            set trackName to my escapeJSON(name of current track)
+            try
+                set currentAlbumData to data of artwork 1 of current track
+                set artworkID to persistent ID of current track
+                set tempPath to POSIX path of (path to temporary items from user domain)
+                set filePath to tempPath & artworkID & ".jpg"
 
-            return "{\"a\":\"" & albumnName & "\",\"m\":\"" & artistName & "\",\"t\":\"" & trackName & "\",\"s\":\"" & player state & "\",\"v\":" & sound volume & ",\"d\":\"" & filePath & "\"}"
+                tell application "System Events"
+                    set fileExists to exists file filePath
+                end tell
+
+                if not fileExists then
+                    my writeArtwork(currentAlbumData, filePath)
+                end if
+                set artworkPath to filePath
+            end try
+
+            return my serializeStatus(albumName, artistName, trackName, playbackState, playerVolume, artworkPath)
         on error
-            return "{\"a\":null,\"m\":null,\"t\":null,\"s\":\"" & player state & "\",\"v\":" & sound volume & ",\"d\":null}"
+            return my serializeStatus(missing value, missing value, missing value, missing value, missing value, missing value)
         end try
     end tell
 else
-    return "{\"a\":null,\"m\":null,\"t\":null,\"s\":null,\"v\":null,\"d\":null}"
+    return my serializeStatus(missing value, missing value, missing value, missing value, missing value, missing value)
 end if
 
-on escapeJSON(value)
-    set AppleScript's text item delimiters to "\""
-    set value to text items of value
-    set AppleScript's text item delimiters to "\\\""
-    set value to value as text
-    set AppleScript's text item delimiters to ""
-    return value
-end escapeJSON
+on writeArtwork(artworkData, filePath)
+    set fileDescriptor to open for access filePath with write permission
+    try
+        set eof of fileDescriptor to 0
+        write artworkData to fileDescriptor starting at eof
+        close access fileDescriptor
+    on error
+        try
+            close access fileDescriptor
+        end try
+        error
+    end try
+end writeArtwork
 
-on replace_chars(theText, searchString, replacementString)
-    set AppleScript's text item delimiters to searchString
-    set the itemList to every text item of theText
-    set AppleScript's text item delimiters to replacementString
-    set theText to the itemList as string
-    set AppleScript's text item delimiters to "" -- Clear the delimiters
-    return theText
-end replace_chars
+on serializeStatus(albumName, artistName, trackName, playbackState, playerVolume, artworkPath)
+    set statusData to current application's NSMutableDictionary's dictionary()
+    my setJSONString(statusData, "a", albumName)
+    my setJSONString(statusData, "m", artistName)
+    my setJSONString(statusData, "t", trackName)
+    my setJSONString(statusData, "s", playbackState)
+    my setJSONNumber(statusData, "v", playerVolume)
+    my setJSONString(statusData, "d", artworkPath)
+    return my serializeJSON(statusData)
+end serializeStatus
+
+on setJSONString(statusData, key, value)
+    if value is missing value then
+        statusData's setObject:(current application's NSNull's |null|()) forKey:key
+    else
+        set jsonString to current application's NSString's stringWithString:(value as text)
+        statusData's setObject:jsonString forKey:key
+    end if
+end setJSONString
+
+on setJSONNumber(statusData, key, value)
+    if value is missing value then
+        statusData's setObject:(current application's NSNull's |null|()) forKey:key
+    else
+        set jsonNumber to current application's NSNumber's numberWithDouble:(value as real)
+        statusData's setObject:jsonNumber forKey:key
+    end if
+end setJSONNumber
+
+on serializeJSON(value)
+    set jsonData to current application's NSJSONSerialization's dataWithJSONObject:value options:0 |error|:(missing value)
+    set jsonString to current application's NSString's alloc()'s initWithData:jsonData encoding:(current application's NSUTF8StringEncoding)
+    return jsonString as text
+end serializeJSON

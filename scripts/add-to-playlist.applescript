@@ -1,34 +1,32 @@
-tell application "Music"
-    try
-        duplicate current track to source "Library"
-        
-        set artistName to artist of current track
-        set trackName to name of current track
-        
-        set trackFound to false
-        set maxAttempts to 5
-        set attempts to 0
-        
-        repeat while (trackFound is false and attempts < maxAttempts)
-            set foundTracks to (every track of library playlist 1 whose artist is artistName and name is trackName)
-            if (count of foundTracks) > 0 then
-                set trackFound to true
-            else
-                set attempts to attempts + 1
-                delay 1
-            end if
-        end repeat
-        
-        if trackFound is true then
-            repeat with theTrack in foundTracks
-                duplicate theTrack to user playlist "$ARG$"
+on run argv
+    set playlistName to item 1 of argv
+    tell application "Music"
+        try
+            set currentTrack to current track
+            set currentTrackID to persistent ID of currentTrack
+            duplicate currentTrack to source "Library"
+
+            set libraryTrack to missing value
+            set maxAttempts to 5
+            set attempts to 0
+
+            repeat while (libraryTrack is missing value and attempts < maxAttempts)
+                try
+                    set libraryTrack to first track of library playlist 1 whose persistent ID is currentTrackID
+                on error
+                    set attempts to attempts + 1
+                    delay 1
+                end try
             end repeat
+
+            if libraryTrack is missing value then
+                return "{\"status\":\"error\"}"
+            end if
+
+            duplicate libraryTrack to user playlist playlistName
             return "{\"status\":\"ok\"}"
-        else
+        on error
             return "{\"status\":\"error\"}"
-        end if
-        
-    on error
-        return "{\"status\":\"error\"}"
-    end try
-end tell
+        end try
+    end tell
+end run

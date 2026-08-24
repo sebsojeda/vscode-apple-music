@@ -1,5 +1,5 @@
+import { spawn } from "child_process";
 import * as fs from "fs";
-import { runAppleScript } from "run-applescript";
 import path = require("path");
 
 export default class AppleScriptRunner {
@@ -9,14 +9,49 @@ export default class AppleScriptRunner {
     this.scriptMap = this.initializeMap();
   }
 
-  public run(script: string, arg: string = "") {
+  public run(script: string, arg?: string): Promise<string> {
     let rawScript = `${script}.applescript`;
     if (this.scriptMap.has(rawScript)) {
-      return runAppleScript(
-        this.scriptMap.get(rawScript)!.replace("$ARG$", arg)
+      return this.runAppleScript(
+        this.scriptMap.get(rawScript)!,
+        arg === undefined ? [] : [arg]
       );
     }
     throw new Error("Script not found");
+  }
+
+  private runAppleScript(script: string, args: string[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const osascript = spawn("osascript", ["-", ...args], {
+        stdio: "pipe",
+      });
+      let stdout = "";
+      let stderr = "";
+
+      osascript.stdout.on("data", (data: Buffer) => {
+        stdout += data.toString();
+      });
+      osascript.stderr.on("data", (data: Buffer) => {
+        stderr += data.toString();
+      });
+      osascript.on("error", reject);
+      osascript.on("close", (code, signal) => {
+        if (code === 0) {
+          resolve(stdout);
+          return;
+        }
+        reject(
+          new Error(
+            stderr.trim() ||
+              `osascript exited with code ${code ?? "unknown"}${
+                signal ? ` (${signal})` : ""
+              }`
+          )
+        );
+      });
+
+      osascript.stdin.end(script);
+    });
   }
 
   private initializeMap() {

@@ -455,15 +455,21 @@ export default class AppleMusicPlayer {
     }
 
     if (this.track && this.artist) {
-      let albumArtwork = this.artwork ?? "";
+      const albumArtwork = this.artwork
+        ? vscode.Uri.file(this.artwork).toString()
+        : undefined;
       let tooltip = new vscode.MarkdownString();
       tooltip.supportHtml = true;
       tooltip.appendMarkdown(
         `<table>
           <tr>
-            <td>
+            ${
+              albumArtwork
+                ? `<td>
               <img src="${albumArtwork}" width="48px" height="48px" />
-            </td>
+            </td>`
+                : ""
+            }
             <td>
               <div><b>${this.track}</b></div>
               <div><small>${this.artist} ${
