@@ -1,3 +1,3 @@
 tell application "Music"
-	  back track
+		  previous track
 end tell

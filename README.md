@@ -6,72 +6,90 @@ Apple Music client for Visual Studio Code — _only available for macOS_
 
 ## Features
 
-- Shows the currently playing song in the status bar.
-- Provides [commands](#supported-commands) for controlling Apple Music.
-- Provides [keybindings](#supported-commands) for controlling Apple Music.
-- Provides buttons for controlling Apple Music.
-- Provides [configuration](#configuration) for the status bar items.
+- Shows the current song in every status-bar layout, with artwork in its tooltip.
+- Provides a Now Playing action menu for common controls without leaving the editor.
+- Searches Apple Music library tracks and playlists, then plays the selected result.
+- Toggles favorites, manages playlists, seeks within tracks, and controls volume, shuffle, and repeat mode.
+- Associates a soundtrack with each workspace, with optional automatic playback when it opens.
+- Offers `compact`, `full`, and `trackOnly` status-bar layouts alongside a focused set of [commands](#supported-commands).
+- Checks the local Apple Music and macOS Automation setup when something is not working.
 
 ## Supported Commands
 
-| Feature               | Available in Status Bar | Available as Command | Keybinding        |
-| --------------------- | :---------------------: | :------------------: | ----------------- |
-| Play/Pause            |           ✅            |          ✅          | `Cmd+Shift+Space` |
-| Mute/Unmute           |           ✅            |          ✅          |                   |
-| Previous Track        |           ✅            |          ✅          | `Cmd+Shift+Left`  |
-| Next Track            |           ✅            |          ✅          | `Cmd+Shift+Right` |
-| Play Playlist         |           ❌            |          ✅          |                   |
-| Shuffle Playlist      |           ❌            |          ✅          |                   |
-| Open                  |           ✅            |          ✅          |                   |
-| Quit                  |           ❌            |          ✅          |                   |
-| Preview Album Artwork |           ✅            |          ❌          |                   |
-| Add to Library        |           ❌            |          ✅          |                   |
-| Add to Playlist       |           ❌            |          ✅          |                   |
-| Add to New Playlist   |           ❌            |          ✅          |                   |
-| Play                  |           ❌            |          ✅          |                   |
-| Pause                 |           ❌            |          ✅          |                   |
-| Mute                  |           ❌            |          ✅          |                   |
-| Unmute                |           ❌            |          ✅          |                   |
-| Volume Up             |           ❌            |          ✅          | `Cmd+Shift+Up`    |
-| Volume Down           |           ❌            |          ✅          | `Cmd+Shift+Down`  |
-| Toggle Shuffle        |           ❌            |          ✅          |                   |
-| Toggle Repeat         |           ❌            |          ✅          |                   |
-| Show Player           |           ❌            |          ✅          |                   |
-| Hide Player           |           ❌            |          ✅          |                   |
+Every command below is available from the Command Palette. The Status Bar Layouts column lists presets that also expose a direct control; `all` means `compact`, `full`, and `trackOnly`.
+
+| Feature                    | Status Bar Layouts |
+| -------------------------- | ------------------ |
+| Play/Pause                 | `compact`, `full`  |
+| Mute/Unmute                | `full`             |
+| Previous Track             | `full`             |
+| Next Track                 | `full`             |
+| Show Now Playing Actions   | `all`              |
+| Toggle Favorite            | —                  |
+| Search Apple Music         | —                  |
+| Seek Forward               | —                  |
+| Seek Backward              | —                  |
+| Restart Track              | —                  |
+| Add to Library             | —                  |
+| Add to Playlist            | —                  |
+| Set Volume                 | —                  |
+| Volume Up                  | —                  |
+| Volume Down                | —                  |
+| Set Repeat Mode            | —                  |
+| Toggle Shuffle             | —                  |
+| Copy Track Info            | —                  |
+| Reveal Current Track in Music | —               |
+| Workspace Soundtrack…      | —                  |
+| Toggle Status Bar Controls | —                  |
+| Check Setup                | —                  |
+| Open Music                 | —                  |
+
+**Search Apple Music** returns matching tracks and playlists. Selecting a playlist starts it immediately while preserving Music's current shuffle state, without an extra playback-mode prompt. **Add to Playlist** can create a new playlist, and **Workspace Soundtrack…** selects, plays, or clears the soundtrack for the current workspace.
+
+Legacy command IDs remain registered for existing keybindings and automation, but redundant variants are hidden from the Command Palette. The extension no longer installs default keybindings; assign any commands you want through VS Code's Keyboard Shortcuts editor.
 
 ## Configuration
 
 ```jsonc
 {
-  // Show the currently playing track in the status bar.
-  "vscodeAppleMusic.showTrackInStatusBar": true,
-  // Time interval (in milliseconds) to update the currently playing track.
-  "vscodeAppleMusic.trackUpdateInterval": 1000,
+  // Choose a status-bar layout: compact, full, or trackOnly.
+  "vscodeAppleMusic.statusBarLayout": "compact",
   // The step size for volume control.
   "vscodeAppleMusic.volumeStep": 6.25,
-  // Show the Previous button in the status bar.
-  "vscodeAppleMusic.showPreviousButton": true,
-  // Show the Play/Pause button in the status bar.
-  "vscodeAppleMusic.showPlayPauseButton": true,
-  // Show the Next button in the status bar.
-  "vscodeAppleMusic.showNextButton": true,
-  // Show the Mute button in the status bar.
-  "vscodeAppleMusic.showMuteButton": true,
-  // Show the player on startup.
-  "vscodeAppleMusic.showOnStartup": true
+  // The number of seconds to seek forward or backward.
+  "vscodeAppleMusic.seekStep": 15,
+  // Show the Apple Music status bar controls on startup.
+  "vscodeAppleMusic.showOnStartup": true,
+  // Automatically play the selected soundtrack when its workspace opens.
+  "vscodeAppleMusic.autoPlayWorkspaceSoundtrack": false
 }
 ```
 
 ## Requirements
 
-- macOS with Apple Music
+- macOS with the Music app.
+- Permission for Visual Studio Code to control Music. macOS normally asks the first time an Apple Music command runs. Choose **OK** when prompted.
+
+If commands do not work, run **Apple Music: Check Setup** from the Command Palette. You can also open **System Settings > Privacy & Security > Automation** and enable Music access for Visual Studio Code (or the VS Code edition you use).
 
 ## Release Notes
+
+### 1.8.0
+
+- Add a Now Playing action menu, favorites, library search, seeking and restart controls, direct volume and repeat selection, track copying, and reveal-in-Music support.
+- Add configurable seek steps.
+- Add per-workspace soundtracks with optional automatic playback.
+- Add Apple Music and macOS Automation setup diagnostics.
+- Improve AppleScript command reliability with serialized execution, timeouts, and clearer errors.
+- Replace individual status-bar visibility settings with `compact`, `full`, and `trackOnly` layout presets.
+- Streamline the Command Palette with state-aware favorite and status-bar actions, unified track and playlist search, and one workspace soundtrack manager.
+- Remove bundled keybindings and the advanced polling setting from the public configuration surface.
+- Hide Quit Music from the Command Palette while retaining its legacy command ID.
 
 ### 1.7.0
 
 - Add 'showOnStartup' configuration
-- Fix issue with albumn names containing quotes
+- Fix issue with album names containing quotes
 
 ### 1.6.0
 

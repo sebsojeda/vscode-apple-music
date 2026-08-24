@@ -3,116 +3,110 @@ import AppleMusicPlayer from "./apple-music-player";
 import AppleScriptRunner from "./apple-script-runner";
 import { commands } from "./constants";
 
-let appleScriptRunner: AppleScriptRunner;
-let player: AppleMusicPlayer;
+let player: AppleMusicPlayer | undefined;
 
-type Config = {
-  id: string;
-  cb: () => void;
-  ui?: vscode.StatusBarItem;
-}[];
+type CommandHandler = () => void | Promise<void>;
 
 export function activate(context: vscode.ExtensionContext) {
-  appleScriptRunner = new AppleScriptRunner();
-  player = new AppleMusicPlayer(appleScriptRunner);
+  const appleScriptRunner = new AppleScriptRunner();
+  player = new AppleMusicPlayer(appleScriptRunner, context);
 
-  const config: Config = [
-    {
-      id: commands.previousTrack,
-      cb: () => player.playPreviousTrack(),
-      ui: player.previousTrackButton,
-    },
-    {
-      id: commands.playPauseTrack,
-      cb: () => player.playPauseTrack(),
-      ui: player.playPauseTrackButton,
-    },
-    {
-      id: commands.playTrack,
-      cb: () => player.playTrack(),
-    },
-    {
-      id: commands.pauseTrack,
-      cb: () => player.pauseTrack(),
-    },
-    {
-      id: commands.nextTrack,
-      cb: () => player.playNextTrack(),
-      ui: player.nextTrackButton,
-    },
-    {
-      id: commands.open,
-      cb: () => player.open(),
-      ui: player.titleTrackButton,
-    },
-    {
-      id: commands.quit,
-      cb: () => player.quit(),
-    },
-    {
-      id: commands.muteUnmuteTrack,
-      cb: () => player.muteUnmuteTrack(),
-      ui: player.muteUnmuteTrackButton,
-    },
-    {
-      id: commands.muteTrack,
-      cb: () => player.muteTrack(),
-    },
-    {
-      id: commands.unmuteTrack,
-      cb: () => player.unmuteTrack(),
-    },
-    {
-      id: commands.volumeUp,
-      cb: () => player.volumeUp(),
-    },
-    {
-      id: commands.volumeDown,
-      cb: () => player.volumeDown(),
-    },
-    {
-      id: commands.toggleRepeat,
-      cb: () => player.toggleRepeat(),
-    },
-    {
-      id: commands.toggleShuffle,
-      cb: () => player.toggleShuffle(),
-    },
-    {
-      id: commands.show,
-      cb: () => player.show(),
-    },
-    {
-      id: commands.hide,
-      cb: () => player.hide(),
-    },
-    {
-      id: commands.addToLibrary,
-      cb: () => player.addToLibrary(),
-    },
-    {
-      id: commands.addToPlaylist,
-      cb: () => player.addToPlaylist(),
-    },
-    {
-      id: commands.playPlaylist,
-      cb: () => player.playPlaylist(false),
-    },
-    {
-      id: commands.shufflePlaylist,
-      cb: () => player.playPlaylist(true),
-    },
-  ];
-
-  config.map((command) => {
+  const register = (
+    id: string,
+    handler: CommandHandler,
+    ui?: vscode.StatusBarItem
+  ) => {
     context.subscriptions.push(
-      vscode.commands.registerCommand(command.id, command.cb)
+      vscode.commands.registerCommand(id, async () => {
+        try {
+          await handler();
+        } catch (error) {
+          await player?.handleError(error);
+        }
+      })
     );
-    if (command.ui) {
-      command.ui.command = command.id;
-      context.subscriptions.push(command.ui);
+    if (ui) {
+      ui.command = id;
     }
-  });
+  };
+
+  register(
+    commands.previousTrack,
+    () => player!.playPreviousTrack(),
+    player.previousTrackButton
+  );
+  register(
+    commands.playPauseTrack,
+    () => player!.playPauseTrack(),
+    player.playPauseTrackButton
+  );
+  register(commands.playTrack, () => player!.playTrack());
+  register(commands.pauseTrack, () => player!.pauseTrack());
+  register(
+    commands.nextTrack,
+    () => player!.playNextTrack(),
+    player.nextTrackButton
+  );
+  register(
+    commands.showNowPlaying,
+    () => player!.showNowPlaying(),
+    player.titleTrackButton
+  );
+  register(commands.open, () => player!.open());
+  register(commands.quit, () => player!.quit());
+  register(
+    commands.muteUnmuteTrack,
+    () => player!.muteUnmuteTrack(),
+    player.muteUnmuteTrackButton
+  );
+  register(commands.muteTrack, () => player!.muteTrack());
+  register(commands.unmuteTrack, () => player!.unmuteTrack());
+  register(commands.volumeUp, () => player!.volumeUp());
+  register(commands.volumeDown, () => player!.volumeDown());
+  register(commands.setVolume, () => player!.chooseVolume());
+  register(commands.toggleRepeat, () => player!.toggleRepeat());
+  register(commands.setRepeatMode, () => player!.chooseRepeatMode());
+  register(commands.toggleShuffle, () => player!.toggleShuffle());
+  register(commands.favoriteTrack, () => player!.favoriteTrack());
+  register(commands.unfavoriteTrack, () => player!.unfavoriteTrack());
+  register(commands.toggleFavorite, () => player!.toggleFavorite());
+  register(commands.seekForward, () => player!.seekForward());
+  register(commands.seekBackward, () => player!.seekBackward());
+  register(commands.restartTrack, () => player!.restartTrack());
+  register(commands.copyTrackInfo, () => player!.copyTrackInfo());
+  register(commands.revealCurrentTrack, () => player!.revealCurrentTrack());
+  register(commands.searchLibrary, () => player!.searchLibrary());
+  register(commands.show, () => player!.show());
+  register(commands.hide, () => player!.hide());
+  register(commands.toggleStatusBarControls, () =>
+    player!.toggleStatusBarControls()
+  );
+  register(commands.addToLibrary, () => player!.addToLibrary());
+  register(commands.addToPlaylist, () => player!.addToPlaylist());
+  register(commands.playPlaylist, () => player!.playPlaylist());
+  register(commands.shufflePlaylist, () => player!.playPlaylist(true));
+  register(commands.selectWorkspaceSoundtrack, () =>
+    player!.selectWorkspaceSoundtrack()
+  );
+  register(commands.clearWorkspaceSoundtrack, () =>
+    player!.clearWorkspaceSoundtrack()
+  );
+  register(commands.playWorkspaceSoundtrack, () =>
+    player!.playWorkspaceSoundtrack()
+  );
+  register(commands.manageWorkspaceSoundtrack, () =>
+    player!.manageWorkspaceSoundtrack()
+  );
+  register(commands.checkSetup, () => player!.checkSetup());
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("vscodeAppleMusic")) {
+        player?.updateConfiguration();
+      }
+    }),
+    player
+  );
 
   if (
     vscode.workspace
@@ -122,13 +116,11 @@ export function activate(context: vscode.ExtensionContext) {
     player.show();
   }
 
-  vscode.workspace.onDidChangeConfiguration((event) => {
-    if (event.affectsConfiguration("vscodeAppleMusic")) {
-      player.updateConfiguration();
-    }
-  });
+  void player
+    .startWorkspaceSoundtrackIfConfigured()
+    .catch((error) => player?.handleError(error));
 }
 
 export function deactivate() {
-  player.dispose();
+  player = undefined;
 }

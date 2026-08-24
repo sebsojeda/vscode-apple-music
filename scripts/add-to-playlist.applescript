@@ -1,7 +1,19 @@
 on run argv
-    set playlistName to item 1 of argv
+    if (count of argv) < 2 then return "{\"status\":\"error\"}"
+    set lookupMode to item 1 of argv as text
+    set lookupValue to item 2 of argv as text
+    if lookupMode is not "id" and lookupMode is not "name" then return "{\"status\":\"error\"}"
+
     tell application "Music"
         try
+            if lookupMode is "id" then
+                set matchingPlaylists to every user playlist whose persistent ID is lookupValue
+            else
+                set matchingPlaylists to every user playlist whose name is lookupValue
+            end if
+            if (count of matchingPlaylists) is 0 then return "{\"status\":\"error\"}"
+            set targetPlaylist to item 1 of matchingPlaylists
+
             set currentTrack to current track
             set currentTrackID to persistent ID of currentTrack
             duplicate currentTrack to source "Library"
@@ -23,7 +35,7 @@ on run argv
                 return "{\"status\":\"error\"}"
             end if
 
-            duplicate libraryTrack to user playlist playlistName
+            duplicate libraryTrack to targetPlaylist
             return "{\"status\":\"ok\"}"
         on error
             return "{\"status\":\"error\"}"
