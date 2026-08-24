@@ -2,6 +2,7 @@
 .eslintrc.json
 node_modules
 out/
+dist/*.map
 src/
 tsconfig.json
 esbuild.js

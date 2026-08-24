@@ -68,6 +68,13 @@ Apple Music client for Visual Studio Code — _only available for macOS_
 
 ## Release Notes
 
+### 1.8.1
+
+- Fix playlist commands for names containing quotes or other special characters.
+- Fix malformed playlist and now-playing data when names or metadata contain JSON-sensitive characters.
+- Fix Add to Playlist targeting duplicate tracks with the same artist and title; it now uses the current track's persistent ID.
+- Keep now-playing information visible when artwork is missing or unreadable, and render local artwork correctly.
+
 ### 1.7.0
 
 - Add 'showOnStartup' configuration
